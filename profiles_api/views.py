@@ -1,12 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from profiles_api import serializers
 from rest_framework import viewsets
-from profiles_api import models
 from rest_framework.authentication import TokenAuthentication
-from profiles_api import permissions
 from rest_framework import filters #For searching objects
+from rest_framework.authtoken.views import ObtainAuthToken #For atoken authorization
+from rest_framework.settings import api_settings #For atoken authorization
+
+from profiles_api import models
+from profiles_api import serializers
+from profiles_api import permissions
 
 class HelloApiView(APIView):
     """Test API View"""
@@ -112,3 +115,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     #For searching the objects
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'email',) #allows to search by name and email fields
+
+#This clsss is for authorizing the user by token
+class UserLoginApiView(ObtainAuthToken):
+   """Handle creating user authentication tokens"""
+   #Below code is to make this visible in the browsable API. For all other base classes this code is available by default. But for ObtainAuthToken, we need to give it manualy to be visible in browsable API
+   renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
