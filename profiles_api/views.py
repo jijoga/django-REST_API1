@@ -6,6 +6,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework import filters #For searching objects
 from rest_framework.authtoken.views import ObtainAuthToken #For atoken authorization
 from rest_framework.settings import api_settings #For atoken authorization
+from rest_framework.permissions import IsAuthenticated
 
 from profiles_api import models
 from profiles_api import serializers
@@ -121,3 +122,21 @@ class UserLoginApiView(ObtainAuthToken):
    """Handle creating user authentication tokens"""
    #Below code is to make this visible in the browsable API. For all other base classes this code is available by default. But for ObtainAuthToken, we need to give it manualy to be visible in browsable API
    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+
+class UserProfileFeedViewSet(viewsets.ModelViewSet):
+    """Handles creating, reading and updating profile feed items"""
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = serializers.ProfileFeedItemSerializer
+    queryset = models.ProfileFeedItem.objects.all()
+    #Below permissio_class code says if the user is authenticated, then he can edit/read his own status feed.
+    permission_classes = (
+        permissions.UpdateOwnStatus,IsAuthenticated
+    )
+    #When a request is made to the ModelViewSet, the request is passed to serializer_class we defined in it and data is validated_
+    #and then the serializer.save() is called automatically because it is a ModelViewSet. This saves the model parameters to DB.
+    #If we need to alter the way the model is saved, we should define it in perform_create() function which is  builtin function of DRF
+    #and define the save in it. Here we use it since the user_profile is defined as read_only and DRF will not automayically save it
+    def perform_create(self, serializer):
+        """Sets the user profile to the logged in user"""
+        serializer.save(user_profile=self.request.user)

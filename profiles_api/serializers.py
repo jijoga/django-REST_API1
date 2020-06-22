@@ -39,12 +39,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-"""
+
 class ProfileFeedItemSerializer(serializers.ModelSerializer):
-    
 
     class Meta:
         model = models.ProfileFeedItem
         fields = ('id', 'user_profile', 'status_text', 'created_on')
+        #We need the user_profile as read_only when creating a status feed. This is beacuse a user should create feeds for him only
+        #If the user can create feeds for other users, it would be a security flaw
+        #So we use extra_kwargs below to make it read_only#id field is automatically created by Django and is  read_only by default
+        #Also created_on is automatically added as per our design and is read_only
         extra_kwargs = {'user_profile': {'read_only': True}}
-"""
